@@ -3,7 +3,10 @@ use types, only : dp
 
 implicit none
 private
-public print_array, print_matrix, inv
+public  print_array, &
+        print_matrix, &
+        inv, &
+        least_squares
 
 contains
 
@@ -57,5 +60,19 @@ function inv(A) result(Ainv)
      stop 'Matrix inversion failed!'
   end if
 end function inv
+
+subroutine least_squares(A, Y, x)
+real(dp), intent(in) :: A(:, :), Y(size(A, 1))
+real(dp), intent(inout) :: x(size(A, 1))
+real(dp)    At(size(A, 2), size(A, 1)), &
+            AtA(size(A, 2), size(A, 2)), &
+            AtAinv(size(A, 2), size(A, 2)), &
+            AtAinvAt(size(A, 2), size(A, 1))
+
+At = transpose(A)
+AtA = matmul(At, A)
+AtAinv = inv(AtA)
+x = matmul(matmul(AtAinv, At), Y)
+end subroutine least_squares
 
 end module math

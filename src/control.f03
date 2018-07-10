@@ -13,7 +13,10 @@ integer, intent(in) :: na, nb, n_samp
 real(dp), intent(in) :: y(n_samp), u(n_samp)
 real(dp), intent(inout) :: sys(na+nb)
 integer, intent(inout) :: error
-real(dp) y_ident(n_samp-max(na, nb)), PHI(n_samp-max(na, nb), na+nb), PHIinv(n_samp-max(na, nb), na+nb)
+real(dp)    y_ident(n_samp-max(na, nb)), &
+            PHI(n_samp-max(na, nb), na+nb), &
+            PHItrans(na+nb, n_samp-max(na, nb)), &
+            PHItransPHI(na+nb, na+nb)
 integer i, max_nanb, n_ident_samp
 
 if (na .lt. 0) then
@@ -47,8 +50,10 @@ write(*,*) "y_ident: "
 call print_array(y_ident)
 write (*,*)
 
-! Compute PHI inverse
-PHIinv = inv(PHI)
+! Solve for numerator and denominator
+! coefficients using least squares
+call least_squares(PHI, y_ident, sys)
+
 end subroutine
 
 function check_n(n) result(error)
