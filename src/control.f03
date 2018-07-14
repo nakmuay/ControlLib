@@ -50,7 +50,7 @@ D = sys%D
 do i = 1, num_samp
 
     ! Compute response
-    response(i) = x(1)
+    response(i) = dot_product(C(1, :), x(:))
 
     ! Update states
     x = matmul(A, x) + matmul(B, u_buff)
@@ -79,18 +79,20 @@ num_coeffs = size(num)
 den_coeffs = size(den)-1
 
 sys%A = 0.0_dp
-sys%A(1, :) = -den(2:)
+sys%A(1, :) = den(2:)
 do i = 2, den_coeffs
     sys%A(i, i-1) = 1.0_dp
 end do
 
+! TODO:This is incorrect 
 sys%B = 0.0_dp
-sys%B(1, :) = num
+sys%B(1, :) = 1.0_dp
 
+! TODO:This is incorrect 
 sys%C = 0.0_dp
-sys%C(1, 1) = 1.0_dp
+sys%C(1, 1) = num(1)
 
-sys%D = 0.0_dp
+sys%D(1, :) = 0.0_dp
 
 end subroutine ss
 
@@ -121,20 +123,19 @@ real(dp), intent(in) :: y(n_samp), u(n_samp)
 type(state_space), intent(inout) :: sys
 integer, intent(inout) :: error
 real(dp)    y_ident(n_samp-max(na, nb)), &
+            y_residuals(n_samp-max(na, nb)), &
             PHI(n_samp-max(na, nb), na+nb), &
-            PHItrans(na+nb, n_samp-max(na, nb)), &
-            PHItransPHI(na+nb, na+nb), &
             coeff(na+nb), &
             num(nb), &
             den(na+1)
 integer i, max_nanb, n_ident_samp
 
-if (na .lt. 0) then
+if (na < 0) then
     error = 1
     return
 end if
 
-if (nb .lt. 1) then
+if (nb < 1) then
     error = 2
     return
 end if
@@ -151,6 +152,9 @@ do i = 1, nb
     PHI(:, na+i) = u(max_nanb+1-i:n_samp-i)
 end do
 
+write(*,*) "PHI:"
+call print_matrix(PHI)
+
 ! Fill Y array
 y_ident = y(max_nanb+1:n_samp)
 
@@ -158,14 +162,25 @@ y_ident = y(max_nanb+1:n_samp)
 ! coefficients using least squares
 call least_squares(PHI, y_ident, coeff)
 
-write(*,*) "y_ident"
+write(*,*) "coeff:"
+call print_array(coeff)
+
+write(*,*) "y_ident:"
 call print_array(y_ident)
 
-write(*,*) "PHI * coeff"
+write(*,*) "PHI * coeff:"
 call print_array(matmul(PHI, coeff))
+
+write(*,*) "Least squares residuals:"
+y_residuals = y_ident - matmul(PHI, coeff)
+call print_array(y_residuals)
+
+write(*,*) "Max error:"
+write(*,*) maxval(abs(y_residuals))
 
 ! Extract numerator and denominator polynomials coefficients
 den(1) = 1.0_dp
+! The minus sign should be removed when ss subroutine if fixed
 den(2:na+1) = -coeff(1:na)
 num(:) = coeff(na+1:)
 
