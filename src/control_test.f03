@@ -6,9 +6,10 @@ use control, only : state_space, ss, print_ss, sim_ss, arx
 integer error 
 type(state_space) sys
 
-integer i, num_samp
-parameter(num_samp=300)
+integer i, num_samp, na, nb
+parameter(num_samp=300, na=2, nb=2)
 real(dp), dimension(num_samp) :: t, u, y, y_sim
+real(dp) x0(na)
 
 ! Fill input and output arrays
 do i = 1, num_samp
@@ -18,7 +19,7 @@ u = sin(0.2 * t)
 y = u * u
 
 write(*,*) "t:"
-call print_array(t)
+!call print_array(t)
 
 !write(*,*) "u:"
 !call print_array(u)
@@ -26,11 +27,13 @@ call print_array(t)
 !write(*,*) "y:"
 !call print_array(y)
 
-call arx(y, u, 2, 1, sys, error, num_samp)
-
-call sim_ss(sys, u, y_sim)
-
+call arx(y, u, na, nb, sys, error, num_samp)
 call print_ss(sys)
+
+x0 = 0.0_dp
+x0(1) = -200.0_dp
+x0(2) = 20.0_dp
+call sim_ss(sys, u, x0, y_sim)
 
 open(unit = 2, file = "sim.txt")
 
