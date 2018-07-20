@@ -152,8 +152,8 @@ do i = 1, nb
     PHI(:, na+i) = u(max_nanb+1-i:n_samp-i)
 end do
 
-!write(*,*) "PHI:"
-!call print_matrix(PHI)
+write(*,*) "PHI:"
+call print_matrix(PHI)
 
 ! Fill Y array
 y_ident = y(max_nanb+1:n_samp)
@@ -172,7 +172,7 @@ call print_array(coeff)
 !call print_array(matmul(PHI, coeff))
 
 !write(*,*) "Least squares residuals:"
-!y_residuals = y_ident - matmul(PHI, coeff)
+y_residuals = y_ident - matmul(PHI, coeff)
 !call print_array(y_residuals)
 
 write(*,*) "Max error:"
