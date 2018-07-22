@@ -8,7 +8,8 @@ public  arx, &
         ss, &
         state_space, &
         print_ss, &
-        sim_ss
+        sim_ss, &
+        find_init_states
 
 type state_space
     real(dp), allocatable :: A(:,:)
@@ -19,10 +20,54 @@ end type
 
 contains
 
-subroutine find_init_states(sys, u, y, x0)
+subroutine find_init_states(sys, u, y, x0, n_samp)
 type(state_space), intent(in) :: sys
-real(dp), dimension(:), intent(in) :: u, y, x0
+real(dp), dimension(:), intent(in) :: u, y
+real(dp), dimension(:), intent(out) :: x0
+integer, intent(in) :: n_samp
 
+integer i
+
+real(dp)    A(size(sys%A, 1), size(sys%A, 2)), &
+            B(size(sys%B)), &
+            C(size(sys%C)), &
+            D(size(sys%D))
+
+real(dp)    CBuSum, &
+            CAprod(size(x0)), &
+            LHS(n_samp, 1), &
+            RHS(n_samp, size(x0))
+
+A = sys%A
+B = sys%B
+C = sys%C
+D = sys%D
+
+LHS(1, 1) = y(1)
+RHS(1, :) = C * u(1)
+
+CBuSum = 0.0_dp
+CAprod = C
+
+do i = 2, n_samp
+
+    CBuSum = CBuSum + (dot_product(C, B)*u(i))
+    CAprod = matmul(CAprod, A)
+
+    LHS(i, 1) = y(i) - CBuSum
+    RHS(i, :) = CAprod
+
+end do
+
+write(*,*) "LHS:"
+call print_matrix(LHS)
+
+write(*,*) "RHS:"
+call print_matrix(RHS)
+call least_squares(RHS, LHS, x0)
+
+write(*, *) "x0"
+call print_array(x0)
 
 end subroutine find_init_states
 
@@ -52,6 +97,7 @@ D = sys%D
 ! Simulate sys using input u
 response(1) = dot_product(C, x0)
 x = matmul(A, x0) + B*u(1)
+
 do i = 2, num_samp
 
     ! Compute response
@@ -67,30 +113,33 @@ end subroutine
 subroutine ss(num, den, sys)
 real(dp), intent(in) :: num(:), den(:)
 
-integer i, num_coeffs, den_coeffs
+integer i, &
+        num_coeffs, &
+        den_coeffs, &
+        num_states
 type(state_space), intent(out) :: sys
-allocate(sys%A(size(den)-1, size(den)-1), &
-         sys%B(size(den)-1), &
-         sys%C(size(den)-1), &
+
+allocate(sys%A(max(size(den)-1, size(num)), max(size(den)-1, size(num))), &
+         sys%B(max(size(den)-1, size(num))), &
+         sys%C(max(size(den)-1, size(num))), &
          sys%D(1))
 
 ! Initialize local variables
 num_coeffs = size(num)
 den_coeffs = size(den)-1
+num_states = max(num_coeffs, den_coeffs)
 
 sys%A = 0.0_dp
 sys%A(1, :) = -den(2:)
-do i = 2, den_coeffs
+do i = 2, num_states
     sys%A(i, i-1) = 1.0_dp
 end do
 
-! TODO:This is incorrect 
 sys%B = 0.0_dp
 sys%B(1) = 1.0_dp
 
-! TODO:This is incorrect 
 sys%C = 0.0_dp
-sys%C = num
+sys%C(1:) = num
 
 sys%D = 0.0_dp
 
