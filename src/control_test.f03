@@ -7,7 +7,7 @@ integer error
 type(state_space) sys
 
 integer i, num_samp, na, nb
-parameter(num_samp=10000, na=10, nb=10, n_states = max(na, nb))
+parameter(num_samp=1000, na=4, nb=4, n_states = max(na, nb))
 real(dp), dimension(num_samp) :: t, u, y, y_sim
 real(dp) x0(n_states)
 
