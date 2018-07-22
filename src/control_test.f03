@@ -7,7 +7,7 @@ integer error
 type(state_space) sys
 
 integer i, num_samp, na, nb
-parameter(num_samp=1000, na=4, nb=4, n_states = max(na, nb))
+parameter(num_samp=100, na=4, nb=4, n_states = max(na, nb))
 real(dp), dimension(num_samp) :: t, u, y, y_sim
 real(dp) x0(n_states)
 
@@ -30,7 +30,11 @@ write(*,*) "t:"
 call arx(y, u, na, nb, sys, error, num_samp)
 call print_ss(sys)
 
-call find_init_states(sys, u, y, x0, 10)
+call find_init_states(sys, u, y, x0, num_samp)
+
+x0 = 0.0_dp
+write(*,*) "x0"
+call print_array(x0)
 
 call sim_ss(sys, u, x0, y_sim)
 

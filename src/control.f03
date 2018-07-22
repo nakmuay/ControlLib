@@ -44,7 +44,7 @@ C = sys%C
 D = sys%D
 
 LHS(1, 1) = y(1)
-RHS(1, :) = C * u(1)
+RHS(1, :) = C
 
 CBuSum = 0.0_dp
 CAprod = C
@@ -59,15 +59,12 @@ do i = 2, n_samp
 
 end do
 
-write(*,*) "LHS:"
-call print_matrix(LHS)
+!write(*,*) "LHS:"
+!call print_matrix(LHS)
 
-write(*,*) "RHS:"
-call print_matrix(RHS)
+!write(*,*) "RHS:"
+!call print_matrix(RHS)
 call least_squares(RHS, LHS, x0)
-
-write(*, *) "x0"
-call print_array(x0)
 
 end subroutine find_init_states
 
@@ -95,10 +92,8 @@ C = sys%C
 D = sys%D
 
 ! Simulate sys using input u
-response(1) = dot_product(C, x0)
-x = matmul(A, x0) + B*u(1)
-
-do i = 2, num_samp
+x = matmul(A, x0)
+do i = 1, num_samp
 
     ! Compute response
     response(i) = dot_product(C, x)
