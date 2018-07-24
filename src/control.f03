@@ -26,7 +26,7 @@ real(dp), dimension(:), intent(in) :: u, y
 real(dp), dimension(:), intent(out) :: x0
 integer, intent(in) :: n_samp
 
-integer i
+integer     i, j
 
 real(dp)    A(size(sys%A, 1), size(sys%A, 2)), &
             B(size(sys%B)), &
@@ -46,24 +46,20 @@ D = sys%D
 LHS(1, 1) = y(1)
 RHS(1, :) = C
 
-CBuSum = 0.0_dp
-CAprod = C
-
 do i = 2, n_samp
-
-    CBuSum = CBuSum + (dot_product(C, B)*u(i))
-    CAprod = matmul(CAprod, A)
+    
+    CBuSum = 0.0_dp
+    CAprod = C
+    do j = 1, i-1
+        CBuSum = CBuSum + dot_product(CAprod, B*u(i - j))
+        CAprod = matmul(CAprod, A)
+    end do
 
     LHS(i, 1) = y(i) - CBuSum
     RHS(i, :) = CAprod
 
 end do
 
-!write(*,*) "LHS:"
-!call print_matrix(LHS)
-
-!write(*,*) "RHS:"
-!call print_matrix(RHS)
 call least_squares(RHS, LHS, x0)
 
 end subroutine find_init_states
@@ -92,7 +88,7 @@ C = sys%C
 D = sys%D
 
 ! Simulate sys using input u
-x = matmul(A, x0)
+x = x0
 do i = 1, num_samp
 
     ! Compute response
@@ -161,11 +157,11 @@ call print_array(sys%D)
 end subroutine print_ss
 
 subroutine arx(y, u, na, nb, sys, error, n_samp)
-
 integer, intent(in) :: na, nb, n_samp 
 real(dp), intent(in) :: y(n_samp), u(n_samp)
 type(state_space), intent(inout) :: sys
 integer, intent(inout) :: error
+
 real(dp)    y_ident(n_samp-max(na, nb)), &
             y_residuals(n_samp-max(na, nb)), &
             PHI(n_samp-max(na, nb), na+nb), &
@@ -179,7 +175,7 @@ if (na < 0) then
     return
 end if
 
-if (nb < 1) then
+if (nb < 0) then
     error = 2
     return
 end if
@@ -196,9 +192,6 @@ do i = 1, nb
     PHI(:, na+i) = u(max_nanb+1-i:n_samp-i)
 end do
 
-write(*,*) "PHI:"
-call print_matrix(PHI)
-
 ! Fill Y array
 y_ident = y(max_nanb+1:n_samp)
 
@@ -206,25 +199,13 @@ y_ident = y(max_nanb+1:n_samp)
 ! coefficients using least squares
 call least_squares(PHI, y_ident, coeff)
 
-write(*,*) "coeff:"
-call print_array(coeff)
-
-!write(*,*) "y_ident:"
-!call print_array(y_ident)
-
-!write(*,*) "PHI * coeff:"
-!call print_array(matmul(PHI, coeff))
-
-!write(*,*) "Least squares residuals:"
 y_residuals = y_ident - matmul(PHI, coeff)
-!call print_array(y_residuals)
 
-write(*,*) "Max error:"
-write(*,*) maxval(abs(y_residuals))
+write(*,*) "MSE:"
+write(*,*) sum(abs(y_residuals))/size(y_residuals)
 
 ! Extract numerator and denominator polynomials coefficients
 den(1) = 1.0_dp
-! The minus sign should be removed when ss subroutine if fixed
 den(2:na+1) = coeff(1:na)
 num(:) = coeff(na+1:)
 
@@ -232,12 +213,4 @@ call ss(num, den, sys)
 
 end subroutine
 
-function check_n(n) result(error)
-integer n, error
-
-error = 0
-if (n < 0) then
-    error = 1
-end if
-end function
 end module control

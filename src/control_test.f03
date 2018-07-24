@@ -7,7 +7,7 @@ integer error
 type(state_space) sys
 
 integer i, num_samp, na, nb
-parameter(num_samp=100, na=4, nb=4, n_states = max(na, nb))
+parameter(num_samp=1000, na=2, nb=2, n_states = max(na, nb))
 real(dp), dimension(num_samp) :: t, u, y, y_sim
 real(dp) x0(n_states)
 
@@ -15,10 +15,14 @@ real(dp) x0(n_states)
 do i = 1, num_samp
     t(i) = 0.1_dp*i
     u(i) = sin(0.2*t(i) + 0.2) + cos(0.1*t(i)) + sin(0.5*t(i))
-    y(i) = u(i) + 0.5*rand()
+    y(i) = u(i) + 0.5*(0.5 - rand())
+
+    if (i > 2) then
+        y(i) = y(i) + 0.5*y(i-1) + 0.25*y(i-2)
+    end if
 end do
 
-write(*,*) "t:"
+!write(*,*) "t:"
 !call print_array(t)
 
 !write(*,*) "u:"
@@ -28,13 +32,9 @@ write(*,*) "t:"
 !call print_array(y)
 
 call arx(y, u, na, nb, sys, error, num_samp)
-call print_ss(sys)
 
 call find_init_states(sys, u, y, x0, num_samp)
-
-x0 = 0.0_dp
-write(*,*) "x0"
-call print_array(x0)
+call print_ss(sys)
 
 call sim_ss(sys, u, x0, y_sim)
 
