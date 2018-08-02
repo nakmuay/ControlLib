@@ -20,6 +20,8 @@ tf_sys = arx(dat, "na", na, "nb", nb);
 y_ref = lsim(sys, u, t, x0);
 
 figure();
-plot(t, y, "b");
+plot(t, y, "b", "linewidth", 2);
 hold on;
-plot(t, y_ref, "r--");
+plot(t, y_sim, "g.-", "linewidth", 2);
+plot(t, y_ref, "r.-", "linewidth", 2);
+
