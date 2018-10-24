@@ -14,7 +14,7 @@ dat.append(out_dat, in_dat)
 
 print(dat.y)
 print(dat.u)
-print(dat.dt)
+print(dat.ts)
 
 dat.plot()
 

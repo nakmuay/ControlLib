@@ -1,64 +1,91 @@
 import numpy as np
 
-class iddata:
-
-    _dt = 1.0
-    _expname = "Experiment"
-
-    def __init__(self, y, u, dt=_dt, expname=_expname):
-        self._y = []
-        self._u = []
-        self._dt = []
-        self._time = []
-        self._expname = [] 
-
-        self.append(y, u, dt, expname)
+class iddata_experiment:
+ 
+    def __init__(self, y, u, ts, name):
+        self._y = y
+        self._u = u
+        self._ts = ts
+        self._time = np.array(range(len(u)))*ts
+        self._name = name
 
     @property
     def y(self):
-        return ReadOnlyList(self._y)
+        return self._y
 
     @property
     def u(self):
-        return ReadOnlyList(self._u)
+        return self._u
 
     @property
-    def dt(self):
-        return ReadOnlyList(self._dt)
+    def ts(self):
+        return self._ts
+
+    @property
+    def time(self):
+        return self._time
+
+    @property
+    def name(self):
+        return self._name
+
+    def plot(self):
+        from matplotlib import pyplot as plt
+
+        plt.subplot(2, 1, 1)
+        plt.title(self.name)
+        plt.plot(self.time, self.y, "r")
+        plt.ylabel("y")
+        plt.xlabel("time")
+
+        plt.subplot(2, 1, 2)
+        plt.plot(self.time, self.u, "b")
+        plt.ylabel("u")
+        plt.xlabel("time")
+
+class iddata:
+
+    _ts = 1.0
+    _expname = "Experiment"
+
+    def __init__(self, y, u, ts=_ts, expname=_expname):
+        self._experiments = []
+        self.append(y, u, ts, expname)
+
+    @property
+    def y(self):
+        exp_y = [exp.y for exp in self._experiments]
+        return ReadOnlyList(exp_y)
+
+    @property
+    def u(self):
+        exp_u = [exp.u for exp in self._experiments]
+        return ReadOnlyList(exp_u)
+
+    @property
+    def ts(self):
+        exp_ts = [exp.ts for exp in self._experiments]
+        return ReadOnlyList(exp_ts)
 
     @property
     def expname(self):
-        return self._expname
+        exp_name = [exp.name for exp in self._experiments]
+        return ReadOnlyList(exp_name)
 
     @property
     def num_experiments(self):
         return len(self._experiments)
 
-    def append(self, y, u, dt=_dt, expname=_expname):
-        self._y.append(y)
-        self._u.append(u)
-
-        self._dt.append(dt)
-        self._time.append(np.arange(len(u)) * dt)
-
-        self._expname.append(expname)
+    def append(self, y, u, ts=_ts, expname=_expname):
+        exp = iddata_experiment(y, u, ts, expname)
+        self._experiments.append(exp)
 
     def plot(self):
         from matplotlib import pyplot as plt
 
-        for y, u, t, e in zip(self._y, self._u, self._time, self._expname):
+        for e in self._experiments:
             plt.figure()
-
-            plt.subplot(2, 1, 1)
-            plt.title(e)
-            plt.plot(t, y, "r")
-            plt.ylabel("y")
-            plt.xlabel("time")
-
-            plt.subplot(2, 1, 2)
-            plt.plot(t, u, "b")
-            plt.ylabel("u")
-            plt.xlabel("time")
+            e.plot()
 
         plt.show()
 
