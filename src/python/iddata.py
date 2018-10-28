@@ -1,8 +1,13 @@
 import numpy as np
+from robustness import assert_type
 
 class iddata_experiment:
  
     def __init__(self, y, u, ts, name):
+        assert_type(y, np.ndarray)
+        assert_type(u, np.ndarray)
+        # TODO: Do we need to check that ts is a number?
+
         self._y = y
         self._u = u
         self._ts = ts
@@ -42,6 +47,7 @@ class iddata_experiment:
         plt.plot(self.time, self.u, "b")
         plt.ylabel("u")
         plt.xlabel("time")
+
 
 class iddata:
 
@@ -100,8 +106,8 @@ class ReadOnlyList(list):
     def __iter__(self):
         return iter(self._list)
 
-    def __slice__(self, *args, **kw):
-        return self._list.__slice__(*args, **kw)
+    def __slice__(self, *args, **kwargs):
+        return self._list.__slice__(*args, **kwargs)
 
     def __repr__(self):
         return repr(self._list)
