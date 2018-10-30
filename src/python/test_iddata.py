@@ -1,18 +1,26 @@
 import numpy as np
 from iddata import iddata
 
-num_samp = 10
-in_dat = np.array(range(num_samp))
+num_samp = 100
+t = np.array(range(num_samp))
+in_dat = np.sin(t/2)
 out_dat = in_dat**2
+dat = iddata(out_dat, in_dat, expname="Experiment_0")
 
-dat = iddata(out_dat, in_dat, expname="Experiment_1") 
-dat2 = iddata(np.array(range(num_samp)), in_dat, ts=1, expname="Experiment_1") 
+for i in range(1, 3):
+    num_samp += 1
+    t = np.array(range(num_samp))
+    in_dat = np.sin(t/2 + i)
+    out_dat = in_dat + np.sin(t + np.pi/4) + np.sin(t + np.pi/3)
 
-in_dat[0] = 1000
+    name = "Experiment_{0}".format(i)
+    dat.append(out_dat, in_dat, expname=name) 
 
-dat.append(out_dat, in_dat, expname="Experiment_2") 
-dat.append(out_dat, in_dat) 
+print(dat.y)
+print(dat.u)
+print(dat.ts)
 
+print(dat.shape)
 
 dat.plot()
 

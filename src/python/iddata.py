@@ -31,8 +31,17 @@ class iddata_experiment:
         return self._time
 
     @property
+    def num_samples(self):
+        return len(self.u)
+
+    @property
     def name(self):
         return self._name
+
+    @property
+    def shape(self):
+        # TODO: Update shape when support for multiple input/output channels are added
+        return (self.num_samples, 1, 1)
 
     def plot(self):
         from matplotlib import pyplot as plt
@@ -82,6 +91,12 @@ class iddata:
     def num_experiments(self):
         return len(self._experiments)
 
+    @property
+    def shape(self):
+        exp_num_samples = [exp.num_samples for exp in self._experiments]
+        (_, num_outputs, num_inputs) = self._experiments[0].shape
+        return (exp_num_samples, num_outputs, num_inputs, self.num_experiments)
+ 
     def append(self, y, u, ts=_ts, expname=_expname):
         exp = iddata_experiment(y, u, ts, expname)
         self._experiments.append(exp)
@@ -115,7 +130,7 @@ class ReadOnlyList(list):
     def __len__(self):
         return len(self._list)
 
-    def NotImplemented(self, *args, **kw):
+    def NotImplemented(self, *args, **kwargs):
         raise ValueError("Read Only list proxy")
 
     append = pop = __setitem__ = __setslice__ = __delitem__ = NotImplemented
