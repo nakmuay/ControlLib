@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from iddata import iddata
 from models import arx
 
-num_samp = 100
+num_samp = 10
 f1 = 0.01
 f2 = 0.04
 t = np.array(range(num_samp))
@@ -15,4 +15,4 @@ dat = iddata(y, u)
 
 #dat.plot()
 
-arx(dat, 1, 1)
+arx(dat, 1, 2)

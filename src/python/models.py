@@ -1,3 +1,5 @@
+import numpy as np
+
 from iddata import iddata
 from robustness import assert_nonnegative, \
                        assert_type
@@ -5,7 +7,6 @@ from robustness import assert_nonnegative, \
 def arx(dat, na, nb):
 
     # Validate inputs
-    #TODO: check input data is supported
     assert_type(dat, iddata)
     assert_nonnegative(na)   
     assert_nonnegative(nb)   
@@ -21,5 +22,14 @@ def arx(dat, na, nb):
     # Check maximum delay
     max_n = max(na, nb)
 
-    print(y)
+    # Fill PHI matrix
+    phi = allocate_array(n_samp - 1, na + nb)
 
+    for row in phi:
+        row[0:na] = 1 
+        row[na:na + nb] = 2
+
+        print(row)
+
+def allocate_array(n_rows, n_cols):
+    return np.zeros(n_rows*n_cols).reshape(n_rows, n_cols)
