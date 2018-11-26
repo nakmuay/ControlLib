@@ -18,4 +18,4 @@ dat = iddata(y, u)
 
 #dat.plot()
 
-arx(dat, 1, 2)
+arx(dat, 2, 1)

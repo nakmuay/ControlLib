@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg as linalg
 
 from iddata import iddata
 from robustness import assert_nonnegative, \
@@ -25,15 +26,31 @@ def arx(dat, na, nb):
     max_n = max(na, nb)
     n_ident_samp = n_samp - max_n
 
-    # Fill PHI matrix
-    phi = allocate_array(n_ident_samp, na + nb)
+    # Build auto regressive (AR) part of the PHI matrix
+    phi_ar = []
+    if (max_n-na == 0):
+        phi_ar = -linalg.toeplitz(y[max_n-1:-1:], y[max_n-1::-1])
+    else:
+        phi_ar = -linalg.toeplitz(y[max_n-1:-1:], y[max_n-1:max(max_n-na-1, 0):-1])
 
-    for row in phi:
-        for i in range(na):
-            row[i] = -y[max_n-i]
+    # Build exogenous (X) part of the PHI matrix
+    phi_x = []
+    if (max_n-nb == 0):
+        phi_x = -linalg.toeplitz(u[max_n-1:-1:], u[max_n-1::-1])
+    else:
+        phi_x = -linalg.toeplitz(u[max_n-1:-1:], u[max_n-1:max(max_n-nb-1, 0):-1])
 
+    phi = np.hstack((phi_ar, phi_x))
+    print("PHI:")
+    print(phi)
 
-        print(row)
+    y_ident = y[max_n::]
+    print("Y (identification)")
+    print(y_ident)
+
+    z_poly, _, _, _ = linalg.lstsq(phi, y_ident)
+    print("Polynomial coefficients:")
+    print(z_poly)
 
 def allocate_array(n_rows, n_cols):
     return np.zeros(n_rows*n_cols).reshape(n_rows, n_cols)
