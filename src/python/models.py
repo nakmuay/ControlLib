@@ -36,9 +36,9 @@ def arx(dat, na, nb):
     # Build exogenous (X) part of the PHI matrix
     phi_x = []
     if (max_n-nb == 0):
-        phi_x = -linalg.toeplitz(u[max_n-1:-1:], u[max_n-1::-1])
+        phi_x = linalg.toeplitz(u[max_n-1:-1:], u[max_n-1::-1])
     else:
-        phi_x = -linalg.toeplitz(u[max_n-1:-1:], u[max_n-1:max(max_n-nb-1, 0):-1])
+        phi_x = linalg.toeplitz(u[max_n-1:-1:], u[max_n-1:max(max_n-nb-1, 0):-1])
 
     phi = np.hstack((phi_ar, phi_x))
     print("PHI:")
@@ -48,9 +48,19 @@ def arx(dat, na, nb):
     print("Y (identification)")
     print(y_ident)
 
-    z_poly, _, _, _ = linalg.lstsq(phi, y_ident)
+    theta = _theta_single_experiment(phi, y_ident)
     print("Polynomial coefficients:")
-    print(z_poly)
+    print(theta)
 
-def allocate_array(n_rows, n_cols):
-    return np.zeros(n_rows*n_cols).reshape(n_rows, n_cols)
+    # Extract transfer function polynomial coefficients
+    den = np.hstack((np.array([1.0]), theta[0:na]))
+    print("Denominator:")
+    print(den)
+
+    num = theta[na::]
+    print("Numerator:")
+    print(num)
+
+def _theta_single_experiment(phi, y):
+    theta, _, _, _ = linalg.lstsq(phi, y)
+    return theta
