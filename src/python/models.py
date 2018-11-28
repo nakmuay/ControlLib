@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.signal as signal
 import scipy.linalg as linalg
 
 from iddata import iddata
@@ -60,6 +61,8 @@ def arx(dat, na, nb):
     num = theta[na::]
     print("Numerator:")
     print(num)
+
+    return signal.TransferFunction(num, den, dt=1.0)
 
 def _theta_single_experiment(phi, y):
     theta, _, _, _ = linalg.lstsq(phi, y)
