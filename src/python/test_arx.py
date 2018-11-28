@@ -16,14 +16,9 @@ y = u + 1/2*np.sin(2*np.pi*f2*t) + 1/10*np.random.rand(num_samp)
 #y = u + 10
 
 dat = iddata(y, u)
-
-#dat.plot()
-
 m = arx(dat, 10, 10)
-m_ss = m.to_ss()
 
-_, y_hat, _ = signal.dlsim(m_ss, u)
-print(y_hat)
+_, y_hat = signal.dlsim(m, u)
 
 plt.plot(t, y)
 plt.plot(t, y_hat, 'r--')
