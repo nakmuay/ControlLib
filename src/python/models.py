@@ -36,11 +36,9 @@ def arx(dat, na, nb):
     theta = _theta_single_experiment(phi, y[max_n::])
 
     # Extract transfer function polynomial coefficients
-    den = np.hstack((np.array([1.0]), theta[0:na]))
     num = theta[na::]
-
-    tf = signal.TransferFunction(num, den, dt=1.0)
-    return tf
+    den = np.hstack((np.array([1.0]), theta[0:na]))
+    return signal.TransferFunction(num, den, dt=1.0)
 
 def _theta_single_experiment(phi, y):
     theta, _, _, _ = linalg.lstsq(phi, y)
@@ -54,5 +52,36 @@ def _build_partial_phi_array(arr, n, max_n):
         col = arr[max_n-1:max(max_n-n-1, 0):-1]
         col = arr[max_n-1::-1]
     
-    return linalg.toeplitz(row, col)
+    return linalg.toeplitz(row, 0.0*col)
 
+def find_init_states(sys, y, u, horizon=None):
+    # TODO: Fix bug causing large mismatch in initial state compared to reference signal
+    A = sys.A
+    B = sys.B
+    C = sys.C
+    D = sys.D
+
+    if not horizon:
+        horizon = len(y)
+
+    _, n_states = np.shape(C)
+
+    lhs = np.zeros((horizon, 1))
+    rhs = np.zeros((horizon, n_states))
+
+    for i in range(horizon):
+        CAprod = C
+        CABSum = 0.0
+
+        for j in reversed(range(i)):
+            CABSum = CABSum + np.dot(CAprod, B*u[j])
+            CAprod = np.dot(CAprod, A)
+
+        lhs[i] = y[i] - CABSum - D*u[i]
+        rhs[i] = CAprod
+
+    lhs[0] = y[0] - D*u[0]
+    rhs[0, :] = C
+
+    x0, _, _, _ = linalg.lstsq(lhs, rhs)
+    return x0
