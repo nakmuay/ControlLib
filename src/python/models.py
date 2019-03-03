@@ -6,7 +6,7 @@ from iddata import iddata
 from robustness import assert_nonnegative, \
                        assert_type
 
-def arx(dat, na, nb):
+def arx(dat, na, nb, dt=1.0):
 
     # Validate inputs
     assert_type(dat, iddata)
@@ -38,7 +38,7 @@ def arx(dat, na, nb):
     # Extract transfer function polynomial coefficients
     num = theta[na::]
     den = np.hstack((np.array([1.0]), theta[0:na]))
-    return signal.TransferFunction(num, den, dt=1.0)
+    return signal.TransferFunction(num, den, dt=dt)
 
 def _theta_single_experiment(phi, y):
     theta, _, _, _ = linalg.lstsq(phi, y)
@@ -78,7 +78,7 @@ def find_init_states(sys, y, u, horizon=None):
             CAprod = np.dot(CAprod, A)
 
         lhs[i] = y[i] - CABSum - D*u[i]
-        rhs[i] = CAprod
+        rhs[i, :] = CAprod
 
     lhs[0] = y[0] - D*u[0]
     rhs[0, :] = C
