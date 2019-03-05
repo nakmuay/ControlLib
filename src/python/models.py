@@ -55,7 +55,6 @@ def _build_partial_phi_array(arr, n, max_n):
     return linalg.toeplitz(col, np.zeros(n))
 
 def find_init_states(sys, y, u, horizon=None):
-    # TODO: Fix bug causing large mismatch in initial state compared to reference signal
     A = sys.A
     B = sys.B
     C = sys.C
@@ -69,7 +68,9 @@ def find_init_states(sys, y, u, horizon=None):
     lhs = np.zeros((horizon, 1))
     rhs = np.zeros((horizon, n_states))
 
-    for i in range(horizon):
+    lhs[0] = y[0]
+    rhs[0, :] = C
+    for i in (n+1 for n in range(horizon-1)):
         CAprod = C
         CABSum = 0.0
 
@@ -80,8 +81,8 @@ def find_init_states(sys, y, u, horizon=None):
         lhs[i] = y[i] - CABSum - D*u[i]
         rhs[i, :] = CAprod
 
-    lhs[0] = y[0] - D*u[0]
-    rhs[0, :] = C
+    # TODO: Validate that inputs to linalg.lstsq are finite, i.e. not NaN and not Inf.
+    x0, _, _, _ = linalg.lstsq(rhs, lhs, cond=None)
 
-    x0, _, _, _ = linalg.lstsq(lhs, rhs)
-    return x0
+    # TODO: Is it ok to flatten the result like this?
+    return x0.reshape(1, x0.size)
