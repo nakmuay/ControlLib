@@ -28,7 +28,7 @@ def arx(dat, na, nb, dt=1.0):
 
     # Build exogenous (X) part of the PHI matrix
     phi_x = _build_partial_phi_array(u, nb, max_n)
-   
+
     # Build complete PHI matrix
     phi = np.hstack((phi_ar, phi_x))
 
@@ -36,8 +36,11 @@ def arx(dat, na, nb, dt=1.0):
     theta = _theta_single_experiment(phi, y[max_n::])
 
     # Extract transfer function polynomial coefficients
-    num = theta[na::]
-    den = np.hstack((np.array([1.0]), theta[0:na]))
+    num = np.zeros(max_n)
+    num[0:nb] = theta[na:na+nb]
+    den = np.zeros(max_n+1)
+    den[0:na+1] = np.hstack((1.0, theta[0:na]))
+
     return signal.TransferFunction(num, den, dt=dt)
 
 def _theta_single_experiment(phi, y):
@@ -45,14 +48,8 @@ def _theta_single_experiment(phi, y):
     return theta
 
 def _build_partial_phi_array(arr, n, max_n):
-    col = arr[max_n-1::-1]
-    row = arr[max_n-1:-1:]
-
-    if (max_n-n > 0):
-        col = arr[max_n-1:max(max_n-n-1, 0):-1]
-        col = arr[max_n-1::-1]
-    
-    return linalg.toeplitz(row, 0.0*col)
+    col = arr[max_n-1:-1:]
+    return linalg.toeplitz(col, np.zeros(n))
 
 def find_init_states(sys, y, u, horizon=None):
     # TODO: Fix bug causing large mismatch in initial state compared to reference signal
