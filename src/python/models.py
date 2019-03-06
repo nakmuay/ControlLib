@@ -53,36 +53,3 @@ def _theta_single_experiment(phi, y):
 def _build_partial_phi_array(arr, n, max_n):
     col = arr[max_n-1:-1:]
     return linalg.toeplitz(col, np.zeros(n))
-
-def find_init_states(sys, y, u, horizon=None):
-    A = sys.A
-    B = sys.B
-    C = sys.C
-    D = sys.D
-
-    if not horizon:
-        horizon = len(y)
-
-    _, n_states = np.shape(C)
-
-    lhs = np.zeros((horizon, 1))
-    rhs = np.zeros((horizon, n_states))
-
-    lhs[0] = y[0]
-    rhs[0, :] = C
-    for i in (n+1 for n in range(horizon-1)):
-        CAprod = C
-        CABSum = 0.0
-
-        for j in reversed(range(i)):
-            CABSum = CABSum + np.dot(CAprod, B*u[j])
-            CAprod = np.dot(CAprod, A)
-
-        lhs[i] = y[i] - CABSum - D*u[i]
-        rhs[i, :] = CAprod
-
-    # TODO: Validate that inputs to linalg.lstsq are finite, i.e. not NaN and not Inf.
-    x0, _, _, _ = linalg.lstsq(rhs, lhs, cond=None)
-
-    # TODO: Is it ok to flatten the result like this?
-    return x0.reshape(1, x0.size)
