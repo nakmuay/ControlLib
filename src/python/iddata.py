@@ -1,7 +1,7 @@
 import numpy as np
 from robustness import assert_type
 
-class iddata_experiment:
+class IdDataExperiment:
  
     def __init__(self, y, u, ts, name):
         assert_type(y, np.ndarray)
@@ -58,7 +58,7 @@ class iddata_experiment:
         plt.xlabel("time")
 
 
-class iddata:
+class IdData:
 
     _ts = 1.0
     _expname = "Experiment"
@@ -83,6 +83,11 @@ class iddata:
         return ReadOnlyList(exp_ts)
 
     @property
+    def time(self):
+        exp_time = [exp.time for exp in self._experiments]
+        return ReadOnlyList(exp_time)
+
+    @property
     def expname(self):
         exp_name = [exp.name for exp in self._experiments]
         return ReadOnlyList(exp_name)
@@ -98,7 +103,7 @@ class iddata:
         return (exp_num_samples, num_outputs, num_inputs, self.num_experiments)
  
     def append(self, y, u, ts=_ts, expname=_expname):
-        exp = iddata_experiment(y, u, ts, expname)
+        exp = IdDataExperiment(y, u, ts, expname)
         self._experiments.append(exp)
 
     def plot(self):
@@ -107,8 +112,6 @@ class iddata:
         for e in self._experiments:
             plt.figure()
             e.plot()
-
-        plt.show()
 
 # Taken from: https://stackoverflow.com/questions/22340576/immutable-list-in-python
 class ReadOnlyList(list):

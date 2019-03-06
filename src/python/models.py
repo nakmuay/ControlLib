@@ -2,14 +2,14 @@ import numpy as np
 import scipy.signal as signal
 import scipy.linalg as linalg
 
-from iddata import iddata
+from iddata import IdData
 from robustness import assert_nonnegative, \
                        assert_type
 
 def arx(dat, na, nb, dt=1.0):
 
     # Validate inputs
-    assert_type(dat, iddata)
+    assert_type(dat, IdData)
     assert_nonnegative(na)   
     assert_nonnegative(nb)   
  

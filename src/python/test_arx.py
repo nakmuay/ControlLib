@@ -2,14 +2,15 @@ import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 
-from iddata import iddata
+from iddata import IdData
+from iddata_factory import FlightIdDataFactory as IdDataFactory
 from models import arx
 from control_utils import find_init_states, normalize
 
-
+"""
 num_samp = 200
 dt = 0.5
-noise_scale = 2.0
+noise_scale = 4.0
 
 t = dt*np.array(range(num_samp))
 u = np.zeros((num_samp))
@@ -25,19 +26,24 @@ y = y + 10.0
 
 u = normalize(u)
 y = normalize(y)
+"""
 
-dat = iddata(y, u)
-m = arx(dat, 20, 20, dt)
+for _ in range(5):
+    factory = IdDataFactory()
+    dat = factory.create()
+    dat.plot()
 
-sys = m.to_ss()
-print("Model poles: {0}".format(m.poles))
-print("B: {0}".format(sys.B))
+    m = arx(dat, 100, 50)
 
-x0 = find_init_states(sys, y, u)
-print("Initial states: {0}".format(x0))
+    sys = m.to_ss()
+    #print("Model poles: {0}".format(m.poles))
 
-t_out, y_out = signal.dlsim(m, u, t=t, x0=x0)
+    x0 = find_init_states(sys, dat.y[0], dat.u[0])
+    #print("Initial states: {0}".format(x0))
 
-plt.plot(t, y)
-plt.plot(t_out, y_out, 'r--')
+    t_out, y_out = signal.dlsim(m, dat.u[0], t=dat.time[0], x0=x0)
+
+    #plt.figure()
+    #plt.plot(dat.time[0], dat.y[0])
+    #plt.plot(t_out, y_out, 'r--')
 plt.show()

@@ -14,8 +14,8 @@ def find_init_states(sys, y, u, horizon=float("inf")):
     if horizon > len(y):
         horizon = len(y)
 
+    # Allocate ordinary least squares  matrices
     _, n_states = np.shape(C)
-
     lhs = np.zeros((horizon, 1))
     rhs = np.zeros((horizon, n_states))
 
@@ -32,6 +32,7 @@ def find_init_states(sys, y, u, horizon=float("inf")):
         lhs[i] = y[i] - CABSum - D*u[i]
         rhs[i, :] = CAprod
 
+    # Solve for the initial states
     x0, _, _, _ = linalg.lstsq(rhs, lhs, cond=None)
     # TODO: Is it ok to flatten the result like this?
     return x0.reshape(1, x0.size)
