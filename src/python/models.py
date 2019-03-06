@@ -38,11 +38,9 @@ def arx(dat, na, nb, dt=1.0):
     # Extract transfer function polynomial coefficients
     num = np.zeros(max_n)
     num[0:nb] = theta[na:na+nb]
-    print("Numerator: {0}".format(num))
 
     den = np.zeros(max_n+1)
     den[0:na+1] = np.hstack((1.0, theta[0:na]))
-    print("Denominator: {0}".format(den))
 
     return signal.TransferFunction(num, den, dt=dt)
 
