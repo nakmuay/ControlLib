@@ -4,13 +4,14 @@ import scipy.linalg as linalg
 def normalize(arr):
     return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
 
-def find_init_states(sys, y, u, horizon=None):
+def find_init_states(sys, y, u, horizon=float("inf")):
+    # Extract system matrices
     A = sys.A
     B = sys.B
     C = sys.C
     D = sys.D
 
-    if not horizon:
+    if horizon > len(y):
         horizon = len(y)
 
     _, n_states = np.shape(C)
