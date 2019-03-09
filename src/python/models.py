@@ -3,15 +3,16 @@ import scipy.signal as signal
 import scipy.linalg as linalg
 
 from iddata import IdData
-from robustness import assert_nonnegative, \
+from robustness import assert_positive, \
+                       assert_nonnegative, \
                        assert_type
 
 def arx(dat, na, nb, dt=1.0):
-
     # Validate inputs
     assert_type(dat, IdData)
-    assert_nonnegative(na)   
-    assert_nonnegative(nb)   
+    assert_nonnegative(na) 
+    assert_nonnegative(nb)
+    assert_positive(dt)
  
     # Extract data
     # TODO: Assume only one experiment for now
@@ -49,5 +50,6 @@ def _theta_single_experiment(phi, y):
     return theta
 
 def _build_partial_phi_array(arr, n, max_n):
-    col = arr[max_n-1:-1:]
+    col = arr[max_n-1:-1]
+    row = arr[max_n-1:max_n-n:-1]
     return linalg.toeplitz(col, np.zeros(n))
