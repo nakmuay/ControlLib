@@ -45,6 +45,7 @@ class IdDataExperiment:
 
     def plot(self):
         from matplotlib import pyplot as plt
+        print(self.y)
 
         plt.subplot(2, 1, 1)
         plt.title(self.name)
