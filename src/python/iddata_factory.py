@@ -1,5 +1,8 @@
 from abc import ABCMeta, abstractmethod
+from random import random 
 import numpy as np
+from scipy.signal import windows, \
+                         convolve
 
 from iddata import IdData 
 
@@ -16,7 +19,7 @@ class SignalModifier(metaclass=ABCMeta):
 
 
 # ----------------------------------------------------------------------------
-class GaussianNoiseModifier(metaclass=ABCMeta):
+class GaussianNoiseModifier(SignalModifier):
     """
     Class which adds gaussian noise to a signal
     """
@@ -31,13 +34,13 @@ class GaussianNoiseModifier(metaclass=ABCMeta):
 
 
 # ----------------------------------------------------------------------------
-class NormalizingModifier(metaclass=ABCMeta):
+class NormalizingModifier(SignalModifier):
     """
     Class which normalizes a signal
     """
 
     def __init__(self):
-        self._name = "test"
+        self._name = "Normalizing modifier"
 
     def apply(self, signal):
         # remove mean
@@ -49,6 +52,21 @@ class NormalizingModifier(metaclass=ABCMeta):
         return signal
 # ----------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------
+class SmoothingModifier(SignalModifier):
+    """
+    Class which smooths a signal
+    """
+
+    def __init__(self, window_size=3, std=1.0):
+        self._name = "Smoothing modifier"
+        self._window_size = window_size
+        self._std = std
+
+    def apply(self, signal):
+        w = windows.gaussian(self._window_size, self._std, sym=True)
+        return convolve(signal, w, mode='same') / sum(w)
+# ----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------
 class SignalSource(metaclass=ABCMeta):
@@ -91,16 +109,27 @@ class CompoundSource(SignalSource):
         return signal
 # ----------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------
+class RandCompoundSource(SignalSource):
+
+    def __init__(self, sources):
+        self._sources = sources
+        
+    def generate(self):
+        signal = random()*self._sources[0].generate()
+        for source in self._sources:
+            signal = signal + random()*source.generate()
+        return signal
+# ----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------
 class IdDataFactory(metaclass=ABCMeta):
-
     """
     Identification data factory interface
     """
 
     @abstractmethod
-    def create(self, generator):
+    def create(self, num_samp):
         pass
 # ----------------------------------------------------------------------------
 
@@ -108,9 +137,9 @@ class IdDataFactory(metaclass=ABCMeta):
 # ----------------------------------------------------------------------------
 class FlightIdDataFactory(IdDataFactory):
 
-    def __init__(self):
-        self._num_samp = 200
-        generator = CompoundSource([
+    def __init__(self, num_samp):
+        self._num_samp = num_samp
+        generator = RandCompoundSource([
                                     SinSource(self._num_samp, amplitude=1.5, frequency=1.0/100.0, phase_shift=3.0),
                                     SinSource(self._num_samp, amplitude=1.0, frequency=1.0/50.0),
                                     SinSource(self._num_samp, amplitude=0.5, frequency=1.0/30.0),
@@ -121,7 +150,7 @@ class FlightIdDataFactory(IdDataFactory):
     def create(self):
         # generate a signal
         in_signal = self._generator.generate()
-        noise_modifier = GaussianNoiseModifier(0.05)
+        noise_modifier = GaussianNoiseModifier(0.08)
         in_signal = noise_modifier.apply(in_signal)
 
         # normalize signal
