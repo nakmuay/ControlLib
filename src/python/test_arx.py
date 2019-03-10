@@ -31,9 +31,8 @@ y = normalize(y)
 for _ in range(5):
     factory = IdDataFactory()
     dat = factory.create()
-    dat.plot()
 
-    m = arx(dat, 100, 50)
+    m = arx(dat, 20, 20)
 
     sys = m.to_ss()
     #print("Model poles: {0}".format(m.poles))
@@ -43,7 +42,7 @@ for _ in range(5):
 
     t_out, y_out = signal.dlsim(m, dat.u[0], t=dat.time[0], x0=x0)
 
-    #plt.figure()
-    #plt.plot(dat.time[0], dat.y[0])
-    #plt.plot(t_out, y_out, 'r--')
+    plt.figure()
+    plt.plot(dat.time[0], dat.y[0])
+    plt.plot(t_out, y_out, 'r--')
 plt.show()

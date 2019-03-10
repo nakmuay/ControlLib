@@ -36,6 +36,7 @@ def arx(dat, na, nb, dt=1.0):
     theta = _theta_single_experiment(phi, y[max_n::])
 
     # Extract transfer function polynomial coefficients
+    # TODO: Handle case where either na or nb are 0
     num = np.zeros(max_n)
     num[0:nb] = theta[na:na+nb]
 
@@ -50,4 +51,11 @@ def _theta_single_experiment(phi, y):
 
 def _build_partial_phi_array(arr, n, max_n):
     col = arr[max_n-1:-1:]
-    return linalg.toeplitz(col, np.zeros(n))
+
+    row_end = max_n-n-1
+    if row_end < 0:
+        row = arr[max_n-1::-1]
+    else:
+        row = arr[max_n-1:max_n-n-1:-1]
+
+    return linalg.toeplitz(col, row)
