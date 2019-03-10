@@ -5,6 +5,11 @@ def assert_type(arg, expected_type):
         raise ValueError(msg)
 
 def assert_nonnegative(arg):
-    if not (arg >= 0.0):
-        msg = "Expected argument to be non-negative, got '{0}'".format(arg)
+    if not arg >= 0.0:
+        msg = "Expected argument to be nonnegative, got '{0}'".format(arg)
+        raise ValueError(msg)
+
+def assert_positive(arg):
+    if not arg > 0.0:
+        msg = "Expected argument to be positive, got '{0}'".format(arg)
         raise ValueError(msg)

@@ -63,7 +63,7 @@ class SignalSource(metaclass=ABCMeta):
 
 
 # ----------------------------------------------------------------------------
-class SinusSource(SignalSource):
+class SinSource(SignalSource):
 
     def __init__(self, num_samples,  amplitude=1.0, frequency=1.0, phase_shift=0.0):
         self._num_samples = num_samples
@@ -111,10 +111,10 @@ class FlightIdDataFactory(IdDataFactory):
     def __init__(self):
         self._num_samp = 200
         generator = CompoundSource([
-                                    SinusSource(self._num_samp, amplitude=1.5, frequency=1.0/100.0, phase_shift=3.0),
-                                    SinusSource(self._num_samp, amplitude=1.0, frequency=1.0/50.0),
-                                    SinusSource(self._num_samp, amplitude=0.5, frequency=1.0/30.0),
-                                    SinusSource(self._num_samp, amplitude=0.25, frequency=1.0/20.0),
+                                    SinSource(self._num_samp, amplitude=1.5, frequency=1.0/100.0, phase_shift=3.0),
+                                    SinSource(self._num_samp, amplitude=1.0, frequency=1.0/50.0),
+                                    SinSource(self._num_samp, amplitude=0.5, frequency=1.0/30.0),
+                                    SinSource(self._num_samp, amplitude=0.25, frequency=1.0/20.0),
                                     ])
         self._generator = generator
 
@@ -129,7 +129,7 @@ class FlightIdDataFactory(IdDataFactory):
         in_signal = norm_modifier.apply(in_signal)
 
         # add some noise to output
-        out_signal = in_signal + 0.5*SinusSource(self._num_samp, amplitude=1.0, frequency=1.0/60.0).generate()
+        out_signal = in_signal + 0.5*SinSource(self._num_samp, amplitude=1.0, frequency=1.0/60.0).generate()
         out_signal = noise_modifier.apply(out_signal)
         
         # normalize output

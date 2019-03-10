@@ -3,15 +3,16 @@ import scipy.signal as signal
 import scipy.linalg as linalg
 
 from iddata import IdData
-from robustness import assert_nonnegative, \
+from robustness import assert_positive, \
+                       assert_nonnegative, \
                        assert_type
 
 def arx(dat, na, nb, dt=1.0):
-
     # Validate inputs
     assert_type(dat, IdData)
-    assert_nonnegative(na)   
-    assert_nonnegative(nb)   
+    assert_nonnegative(na) 
+    assert_nonnegative(nb)
+    assert_positive(dt)
  
     # Extract data
     # TODO: Assume only one experiment for now

@@ -31,9 +31,13 @@ y = normalize(y)
 for _ in range(5):
     factory = IdDataFactory()
     dat = factory.create()
+<<<<<<< HEAD
 
     m = arx(dat, 20, 20)
+=======
+>>>>>>> 8e61f104e5ea32007c424cc409e7f75b5b6d14dd
 
+    m = arx(dat, 40, 30)
     sys = m.to_ss()
     #print("Model poles: {0}".format(m.poles))
 
