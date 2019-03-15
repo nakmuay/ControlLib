@@ -7,9 +7,11 @@ from robustness import assert_positive, \
                        assert_nonnegative, \
                        assert_type
 
-def arx(dat, na, nb, dt=1.0):
+def arx(dat, orders=(1, 1), dt=1.0):
     # Validate inputs
     assert_type(dat, IdData)
+
+    na, nb = orders
     assert_nonnegative(na) 
     assert_nonnegative(nb)
     assert_positive(dt)
@@ -51,12 +53,10 @@ def _theta_single_experiment(phi, y):
     return theta
 
 def _build_partial_phi_array(arr, n, max_n):
-    col = arr[max_n-1:-1:]
-
     row_end = max_n-n-1
     if row_end < 0:
-        row = arr[max_n-1::-1]
-    else:
-        row = arr[max_n-1:max_n-n-1:-1]
+        row_end = None
+    row = arr[max_n-1:row_end:-1]
 
+    col = arr[max_n-1:-1:]
     return linalg.toeplitz(col, row)
