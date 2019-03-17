@@ -1,14 +1,12 @@
 import numpy as np
 from robustness import assert_type, \
-                       assert_not_none
+                       assert_not_none, \
+                       assert_array_like
 
 class IdDataExperiment:
  
     def __init__(self, y, u, dt, name):
-        assert_type(y, np.ndarray)
-        assert_type(u, np.ndarray)
         # TODO: Do we need to check that ts is a number?
-
         self._y = y
         self._u = u
         self._dt = dt
@@ -66,11 +64,8 @@ class IdData:
     _expname = "Experiment"
 
     def __init__(self, y, u, dt=_dt, expname=_expname):
-        assert_not_none(y)
-        assert_not_none(u)
-
         self._experiments = []
-        self.append(np.array(y), np.array(u), dt, expname)
+        self.append(y, u, dt, expname)
 
     @property
     def y(self):
@@ -108,7 +103,12 @@ class IdData:
         return (exp_num_samples, num_outputs, num_inputs, self.num_experiments)
  
     def append(self, y, u, dt=_dt, expname=_expname):
-        exp = IdDataExperiment(y, u, dt, expname)
+        assert_not_none(y)
+        assert_array_like(y)
+        assert_not_none(u)
+        assert_array_like(u)
+
+        exp = IdDataExperiment(np.array(y), np.array(u), dt, expname)
         self._experiments.append(exp)
 
     def plot(self):

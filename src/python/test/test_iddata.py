@@ -36,5 +36,9 @@ class TestIdDataInit(unittest.TestCase):
 
         np_test.assert_almost_equal(dat.u[0], np.array(range(3)))
 
+    def test_array_like_assert(self):
+        self.assertRaises(ValueError, IdData, 0.0, np.array(range(3)))
+        self.assertRaises(ValueError, IdData, np.array(range(3)), 0.0)
+
 if __name__ == "__main__":
     unittest.main()
