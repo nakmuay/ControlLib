@@ -7,7 +7,7 @@ from robustness import assert_positive, \
                        assert_nonnegative, \
                        assert_type
 
-def arx(dat, orders=(1, 1), dt=1.0):
+def arx(dat, orders, dt=1.0):
     # Validate inputs
     assert_type(dat, IdData)
 
