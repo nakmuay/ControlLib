@@ -1,17 +1,18 @@
 import numpy as np
-from robustness import assert_type
+from robustness import assert_type, \
+                       assert_not_none
 
 class IdDataExperiment:
  
-    def __init__(self, y, u, ts, name):
+    def __init__(self, y, u, dt, name):
         assert_type(y, np.ndarray)
         assert_type(u, np.ndarray)
         # TODO: Do we need to check that ts is a number?
 
         self._y = y
         self._u = u
-        self._ts = ts
-        self._time = np.array(range(len(u)))*ts
+        self._dt = dt
+        self._time = np.array(range(len(u)))*dt
         self._name = name
 
     @property
@@ -23,7 +24,7 @@ class IdDataExperiment:
         return self._u
 
     @property
-    def ts(self):
+    def dt(self):
         return self._ts
 
     @property
@@ -61,12 +62,15 @@ class IdDataExperiment:
 
 class IdData:
 
-    _ts = 1.0
+    _dt = 1.0
     _expname = "Experiment"
 
-    def __init__(self, y, u, ts=_ts, expname=_expname):
+    def __init__(self, y, u, dt=_dt, expname=_expname):
+        assert_not_none(y)
+        assert_not_none(u)
+
         self._experiments = []
-        self.append(y, u, ts, expname)
+        self.append(np.array(y), np.array(u), dt, expname)
 
     @property
     def y(self):
@@ -103,8 +107,8 @@ class IdData:
         (_, num_outputs, num_inputs) = self._experiments[0].shape
         return (exp_num_samples, num_outputs, num_inputs, self.num_experiments)
  
-    def append(self, y, u, ts=_ts, expname=_expname):
-        exp = IdDataExperiment(y, u, ts, expname)
+    def append(self, y, u, dt=_dt, expname=_expname):
+        exp = IdDataExperiment(y, u, dt, expname)
         self._experiments.append(exp)
 
     def plot(self):
