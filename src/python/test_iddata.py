@@ -2,8 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from iddata import IdData
 
-d = IdData(None, None)
-
 num_samp = 10
 t = np.array(range(num_samp))
 in_dat = np.sin(t/2)
@@ -26,7 +24,7 @@ print()
 print(dat.u)
 print()
 
-print(dat.ts)
+print(dat.dt)
 print()
 
 print(dat.shape)

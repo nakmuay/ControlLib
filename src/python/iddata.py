@@ -28,7 +28,7 @@ class IdDataExperiment:
 
     @property
     def dt(self):
-        return self._ts
+        return self._dt
 
     @property
     def time(self):
@@ -97,9 +97,9 @@ class IdData:
         return ReadOnlyList(exp_u)
 
     @property
-    def ts(self):
-        exp_ts = [exp.ts for exp in self._experiments]
-        return ReadOnlyList(exp_ts)
+    def dt(self):
+        exp_dt = [exp.dt for exp in self._experiments]
+        return ReadOnlyList(exp_dt)
 
     @property
     def time(self):
