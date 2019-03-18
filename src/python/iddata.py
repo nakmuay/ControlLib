@@ -3,12 +3,17 @@ from robustness import assert_type, \
                        assert_not_none, \
                        assert_array_like
 
+def _convert_data_shape(dat):
+    if dat.ndim == 1:
+        dat = dat[:, None]
+    return dat
+
 class IdDataExperiment:
  
     def __init__(self, y, u, dt, name):
         # TODO: Do we need to check that ts is a number?
-        self._y = y
-        self._u = u
+        self._y = _convert_data_shape(y)
+        self._u = _convert_data_shape(u)
         self._dt = dt
         self._time = np.array(range(len(u)))*dt
         self._name = name
@@ -30,6 +35,20 @@ class IdDataExperiment:
         return self._time
 
     @property
+    def num_outputs(self):
+        if self._y.ndim == 0:
+            return 0
+        else:
+            return self._y.shape[1]
+
+    @property
+    def num_inputs(self):
+        if self._u.ndim == 0:
+            return 0
+        else:
+            return self._u.shape[1]
+
+    @property
     def num_samples(self):
         return len(self.u)
 
@@ -40,7 +59,7 @@ class IdDataExperiment:
     @property
     def shape(self):
         # TODO: Update shape when support for multiple input/output channels are added
-        return (self.num_samples, 1, 1)
+        return (self.num_samples, self.num_outputs, self.num_inputs)
 
     def plot(self):
         from matplotlib import pyplot as plt
