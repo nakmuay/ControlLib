@@ -34,23 +34,25 @@ factory = IdDataFactory(400)
 
 for _ in range(5):
     dat = factory.create()
-    smooth_dat = IdData(smoother.apply(dat.y[0]), smoother.apply(dat.u[0]))
+    #smooth_dat = IdData(smoother.apply(dat.y[0]), smoother.apply(dat.u[0]))
    
     # Find ARX model for original data
-    m1 = arx(dat, orders=(20, 20))
+    m1 = arx(dat, orders=(10, 10))
     sys1 = m1.to_ss()
     x0 = find_init_states(sys1, dat.y[0], dat.u[0])
     t_out1, y_out1 = signal.dlsim(m1, dat.u[0], t=dat.time[0], x0=x0)
 
+    """
     # Find ARX model for original data
     dat2 = IdData(smoother.apply(dat.y[0]), smoother.apply(dat.u[0]))
     m2 = arx(dat2, orders=(20, 20))
     sys2 = m2.to_ss()
     x0 = find_init_states(sys2, dat.y[0], dat.u[0])
     t_out2, y_out2 = signal.dlsim(m2, dat.u[0], t=dat.time[0], x0=x0)
+    """
 
     plt.figure()
     plt.plot(dat.time[0], dat.y[0])
     plt.plot(t_out1, y_out1, 'r--')
-    plt.plot(t_out2, y_out2, 'g--')
+    #plt.plot(t_out2, y_out2, 'g--')
 plt.show()
