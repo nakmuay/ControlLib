@@ -1,7 +1,7 @@
-from matplotlib import pyplot as plt
 import collections
+from matplotlib import pyplot as plt
 
-def import_data2(file):
+def import_data(file):
     d = collections.defaultdict(list)
     with open(file, 'r') as f:
         # Skip header
@@ -14,7 +14,7 @@ def import_data2(file):
     return d
 
 def plot(file):
-    d = import_data2(file)
+    d = import_data(file)
 
     plt.figure()
     u, = plt.plot(d[0], d[1], 'g', label="u")
