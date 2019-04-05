@@ -133,6 +133,17 @@ class IdDataFactory(metaclass=ABCMeta):
         pass
 # ----------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------
+class TwoInputSignalsIdDataFactory(IdDataFactory):
+
+    def __init__(self, num_samp):
+        in_signal = np.array(range(num_samp))
+        self._in_signals = np.vstack((in_signal, 10*in_signal)).T
+        self._out_signal = np.array(range(num_samp)).T
+
+    def create(self):
+        return IdData(self._out_signal, self._in_signals)
+# ----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------
 class FlightIdDataFactory(IdDataFactory):
