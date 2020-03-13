@@ -1,8 +1,15 @@
+import itertools
+import random
 import numpy as np
 import scipy.linalg as linalg
 
 def normalize(arr):
     return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
+
+def arx_orders(na_orders, nb_orders, shuffle=False):
+    products = itertools.product(na_orders, nb_orders)
+    for p in products:
+        yield p
 
 def find_init_states(sys, y, u, horizon=float("inf")):
     # Extract system matrices
