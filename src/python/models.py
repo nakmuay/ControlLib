@@ -56,7 +56,7 @@ def _build_partial_phi_array(arr, n, max_n):
     row_end = max_n-n-1
     if row_end < 0:
         row_end = None
-    row = arr[max_n-1:row_end:-1]
 
-    col = arr[max_n-1:-1:]
+    row = arr[max_n-1:row_end:-1]
+    col = arr[max_n-1:-1]
     return linalg.toeplitz(col, row)

@@ -6,19 +6,26 @@ from scipy.signal import windows, \
 
 from iddata import IdData 
 
-# ----------------------------------------------------------------------------
 class SignalModifier(metaclass=ABCMeta):
     """
     Interface for signal source modifiers
     """
 
-    @abstractmethod
     def apply(self, source):
+        if (isinstance(source, IdData)):
+            return self._apply_iddata(source)
+        return self._apply_core(source)
+
+    def _apply_iddata(self, dat):
+        u = self._apply_core(dat.u[0][:, 0])
+        y = self._apply_core(dat.y[0][:, 0])
+        dt = dat.dt
+        return IdData(u, y, dt=dt)
+
+    @abstractmethod
+    def _apply_core(self, signal):
         pass
-# ----------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------
 class GaussianNoiseModifier(SignalModifier):
     """
     Class which adds gaussian noise to a signal
@@ -27,13 +34,10 @@ class GaussianNoiseModifier(SignalModifier):
     def __init__(self, std=1.0):
         self._std = std
 
-    def apply(self, signal):
+    def _apply_core(self, signal):
         signal = signal + np.random.normal(0.0, self._std, len(signal))
         return signal
-# ----------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------
 class NormalizingModifier(SignalModifier):
     """
     Class which normalizes a signal
@@ -42,7 +46,7 @@ class NormalizingModifier(SignalModifier):
     def __init__(self):
         self._name = "Normalizing modifier"
 
-    def apply(self, signal):
+    def _apply_core(self, signal):
         # remove mean
         signal = signal - np.mean(signal)
         denominator = np.max(np.abs(signal))
@@ -50,9 +54,7 @@ class NormalizingModifier(SignalModifier):
             print("Division by zero!")
         signal = signal / denominator
         return signal
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class SmoothingModifier(SignalModifier):
     """
     Class which smooths a signal
@@ -63,12 +65,15 @@ class SmoothingModifier(SignalModifier):
         self._window_size = window_size
         self._std = std
 
-    def apply(self, signal):
+    def apply(self, dat):
+        if (type(dat), type(IdData)):
+            return self._apply_iddata(dat)
+        return self._apply_core(dat)
+
+    def _apply_core(self, signal):
         w = windows.gaussian(self._window_size, self._std, sym=True)
         return convolve(signal, w, mode='same') / sum(w)
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class SignalSource(metaclass=ABCMeta):
     """
     Interface for signal sources
@@ -77,10 +82,7 @@ class SignalSource(metaclass=ABCMeta):
     @abstractmethod
     def generate(self):
         pass
-# ----------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------
 class SinSource(SignalSource):
 
     def __init__(self, num_samples,  amplitude=1.0, frequency=1.0, phase_shift=0.0):
@@ -93,10 +95,7 @@ class SinSource(SignalSource):
         time_vector = np.array(range(self._num_samples))
         signal = self._amplitude * np.sin(2.0*np.pi * self._frequency * time_vector + self._phase_shift)
         return signal
-# ----------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------
 class CompoundSource(SignalSource):
 
     def __init__(self, sources):
@@ -107,9 +106,7 @@ class CompoundSource(SignalSource):
         for source in self._sources:
             signal = signal + source.generate()
         return signal
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class RandCompoundSource(SignalSource):
 
     def __init__(self, sources):
@@ -120,9 +117,7 @@ class RandCompoundSource(SignalSource):
         for source in self._sources:
             signal = signal + random()*source.generate()
         return signal
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class IdDataFactory(metaclass=ABCMeta):
     """
     Identification data factory interface
@@ -131,9 +126,7 @@ class IdDataFactory(metaclass=ABCMeta):
     @abstractmethod
     def create(self, num_samp):
         pass
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class TwoInputSignalsIdDataFactory(IdDataFactory):
 
     def __init__(self, num_samp):
@@ -143,9 +136,7 @@ class TwoInputSignalsIdDataFactory(IdDataFactory):
 
     def create(self):
         return IdData(self._out_signal, self._in_signals)
-# ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
 class FlightIdDataFactory(IdDataFactory):
 
     def __init__(self, num_samp):
@@ -161,7 +152,7 @@ class FlightIdDataFactory(IdDataFactory):
     def create(self):
         # generate a signal
         in_signal = self._generator.generate()
-        noise_modifier = GaussianNoiseModifier(0.08)
+        noise_modifier = GaussianNoiseModifier(0.04)
         in_signal = noise_modifier.apply(in_signal)
 
         # normalize signal
@@ -178,4 +169,3 @@ class FlightIdDataFactory(IdDataFactory):
         # create identification data
         dat = IdData(out_signal, in_signal)
         return dat
-# ----------------------------------------------------------------------------
