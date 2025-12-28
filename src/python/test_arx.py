@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from iddata_factory import FlightIdDataFactory as IdDataFactory
 from models import arx
 from control_utils import find_init_states
-from iddata_factory import SmoothingModifier
+from signal_modifier import SmoothingModifier
 
 smoother = SmoothingModifier(3, 10)
 factory = IdDataFactory(500)
