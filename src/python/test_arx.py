@@ -1,5 +1,5 @@
-import scipy.signal as signal
-import matplotlib.pyplot as plt
+from scipy import signal
+from matplotlib import pyplot as plt
 
 from iddata_factory import FlightIdDataFactory as IdDataFactory
 from models import arx
@@ -11,7 +11,7 @@ factory = IdDataFactory(500)
 
 for _ in range(2):
     dat = factory.create()
-   
+
     # Find ARX model for original data
     m1 = arx(dat, orders=(20, 30))
     sys1 = m1.to_ss()

@@ -16,7 +16,7 @@ for i in range(1, 3):
     out_dat_2 = np.array(out_dat_1) + 10
 
     name = "Experiment_{0}".format(i)
-    dat.append(np.vstack((out_dat_1, out_dat_2)).T, in_dat, expname=name) 
+    dat.append(np.vstack((out_dat_1, out_dat_2)).T, in_dat, expname=name)
 
 print(dat.y)
 print()

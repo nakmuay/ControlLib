@@ -11,7 +11,7 @@ class SignalModifier(metaclass=ABCMeta):
     """
 
     def apply(self, source):
-        if (isinstance(source, IdData)):
+        if isinstance(source, IdData):
             return self._apply_iddata(source)
         return self._apply_core(source)
 
@@ -63,11 +63,6 @@ class SmoothingModifier(SignalModifier):
         self._name = "Smoothing modifier"
         self._window_size = window_size
         self._std = std
-
-    def apply(self, dat):
-        if (type(dat), type(IdData)):
-            return self._apply_iddata(dat)
-        return self._apply_core(dat)
 
     def _apply_core(self, signal):
         w = windows.gaussian(self._window_size, self._std, sym=True)

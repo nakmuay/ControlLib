@@ -1,42 +1,34 @@
 import itertools
-import random
 import numpy as np
-import scipy.linalg as linalg
+from scipy import linalg
 
 def normalize(arr):
     return (arr - np.min(arr)) / (np.max(arr) - np.min(arr))
 
 def arx_orders(na_orders, nb_orders, shuffle=False):
     products = itertools.product(na_orders, nb_orders)
-    for p in products:
-        yield p
+    yield from products
 
 def find_init_states(sys, y, u, horizon=float("inf")):
-    # Extract system matrices
-    A = sys.A
-    B = sys.B
-    C = sys.C
-    D = sys.D
-
-    if horizon > len(y):
-        horizon = len(y)
+    # handle max horizon
+    horizon = min(horizon, len(y))
 
     # Allocate ordinary least squares  matrices
-    _, n_states = np.shape(C)
+    _, n_states = np.shape(sys.C)
     lhs = np.zeros((horizon, 1))
     rhs = np.zeros((horizon, n_states))
 
     lhs[0] = y[0]
-    rhs[0, :] = C
+    rhs[0, :] = sys.C
     for i in (n+1 for n in range(horizon-1)):
-        CAprod = C
+        CAprod = sys.C
         CABSum = 0.0
 
         for j in reversed(range(i)):
-            CABSum = CABSum + np.dot(CAprod, B*u[j])
-            CAprod = np.dot(CAprod, A)
+            CABSum = CABSum + np.dot(CAprod, sys.B*u[j])
+            CAprod = np.dot(CAprod, sys.A)
 
-        lhs[i] = y[i] - CABSum - D*u[i]
+        lhs[i] = y[i] - CABSum - sys.D*u[i]
         rhs[i, :] = CAprod
 
     # Solve for the initial states

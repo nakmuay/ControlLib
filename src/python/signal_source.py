@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from random import random 
+from random import random
 import numpy as np
 
 class SignalSource(metaclass=ABCMeta):
@@ -28,7 +28,7 @@ class CompoundSource(SignalSource):
 
     def __init__(self, sources):
         self._sources = sources
-        
+
     def generate(self):
         signal = self._sources[0].generate()
         for source in self._sources:
@@ -39,7 +39,7 @@ class RandCompoundSource(SignalSource):
 
     def __init__(self, sources):
         self._sources = sources
-        
+
     def generate(self):
         signal = random()*self._sources[0].generate()
         for source in self._sources:

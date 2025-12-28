@@ -1,6 +1,6 @@
 import numpy as np
-import scipy.signal as signal
-import scipy.linalg as linalg
+from scipy import signal
+from scipy import linalg
 
 from iddata import IdData
 from robustness import assert_positive, \
@@ -12,10 +12,10 @@ def arx(dat, orders, dt=1.0):
     assert_type(dat, IdData)
 
     na, nb = orders
-    assert_nonnegative(na) 
+    assert_nonnegative(na)
     assert_nonnegative(nb)
     assert_positive(dt)
- 
+
     # Extract data
     # TODO: Assume only one experiment for now
     (exp_samp, _, _, _) = dat.shape

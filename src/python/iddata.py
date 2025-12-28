@@ -1,6 +1,5 @@
 import numpy as np
-from robustness import assert_type, \
-                       assert_not_none, \
+from robustness import assert_not_none, \
                        assert_array_like
 
 def _convert_data_shape(dat):
@@ -9,7 +8,7 @@ def _convert_data_shape(dat):
     return dat
 
 class IdDataExperiment:
- 
+
     def __init__(self, y, u, dt, name):
         # TODO: Do we need to check that ts is a number?
         self._y = _convert_data_shape(y)
@@ -38,15 +37,13 @@ class IdDataExperiment:
     def num_outputs(self):
         if self._y.ndim == 0:
             return 0
-        else:
-            return self._y.shape[1]
+        return self._y.shape[1]
 
     @property
     def num_inputs(self):
         if self._u.ndim == 0:
             return 0
-        else:
-            return self._u.shape[1]
+        return self._u.shape[1]
 
     @property
     def num_samples(self):
@@ -120,7 +117,7 @@ class IdData:
         exp_num_samples = [exp.num_samples for exp in self._experiments]
         (_, num_outputs, num_inputs) = self._experiments[0].shape
         return (exp_num_samples, num_outputs, num_inputs, self.num_experiments)
- 
+
     def append(self, y, u, dt=_dt, expname=_expname):
         assert_not_none(y)
         assert_array_like(y)
@@ -157,7 +154,7 @@ class ReadOnlyList(list):
     def __len__(self):
         return len(self._list)
 
-    def NotImplemented(self, *args, **kwargs):
+    def _not_implemented(self, *args, **kwargs):
         raise ValueError("Read Only list proxy")
 
-    append = pop = __setitem__ = __setslice__ = __delitem__ = NotImplemented
+    append = pop = __setitem__ = __setslice__ = __delitem__ = _not_implemented
