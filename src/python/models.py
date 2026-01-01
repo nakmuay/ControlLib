@@ -27,16 +27,16 @@ def arx(dat, orders, dt=1.0):
     max_n = max(na, nb)
 
     # Build auto regressive (AR) part of the PHI matrix
-    phi_ar = _build_partial_phi_array(-1.0*y[:, 0], na, max_n)
+    phi_ar = _build_partial_phi_array(-1.0*y, na, max_n)
 
     # Build exogenous (X) part of the PHI matrix
-    phi_x = _build_partial_phi_array(u[:, 0], nb, max_n)
+    phi_x = _build_partial_phi_array(u, nb, max_n)
 
     # Build complete PHI matrix
     phi = np.hstack((phi_ar, phi_x))
 
     # Solve for theta
-    theta = _theta_single_experiment(phi, y[max_n::, 0])
+    theta = _theta_single_experiment(phi, y[max_n::])
 
     # Extract transfer function polynomial coefficients
     # TODO: Handle case where either na or nb are 0

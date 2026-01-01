@@ -9,11 +9,11 @@ from signal_modifier import SmoothingModifier
 smoother = SmoothingModifier(3, 10)
 factory = IdDataFactory(500)
 
-for _ in range(2):
+for _ in range(1):
     dat = factory.create()
 
     # Find ARX model for original data
-    m1 = arx(dat, orders=(20, 30))
+    m1 = arx(dat, orders=(50, 10))
     sys1 = m1.to_ss()
     x0 = find_init_states(sys1, dat.y[0], dat.u[0])
     t_out1, y_out1 = signal.dlsim(m1, dat.u[0], t=dat.time[0], x0=x0)

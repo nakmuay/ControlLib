@@ -16,8 +16,8 @@ class SignalModifier(metaclass=ABCMeta):
         return self._apply_core(source)
 
     def _apply_iddata(self, dat):
-        u = self._apply_core(dat.u[0][:, 0])
-        y = self._apply_core(dat.y[0][:, 0])
+        u = self._apply_core(dat.u[0])
+        y = self._apply_core(dat.y[0])
         dt = dat.dt
         return IdData(u, y, dt=dt)
 

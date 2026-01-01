@@ -24,3 +24,13 @@ def assert_positive(arg):
     if not arg > 0.0:
         msg = "Expected argument to be positive, got '{0}'".format(arg)
         raise ValueError(msg)
+    
+def assert_less_than(arg, upper_bound):
+    if not arg < upper_bound:
+        msg = "Expected argument to be less than '{0}', got '{1}'".format(upper_bound, arg)
+        raise ValueError(msg)
+    
+def assert_equal(first, second):
+       if not first == second:
+        msg = "Expected argument to be equal, got '{0}' and '{1}'".format(first, second)
+        raise ValueError(msg) 

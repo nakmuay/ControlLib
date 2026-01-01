@@ -1,20 +1,25 @@
 import numpy as np
 from robustness import assert_not_none, \
-                       assert_array_like
-
-def _convert_data_shape(dat):
-    if dat.ndim == 1:
-        dat = dat[:, None]
-    return dat
+                        assert_less_than, \
+                        assert_array_like, \
+                        assert_less_than, \
+                        assert_equal
 
 class IdDataExperiment:
 
     def __init__(self, y, u, dt, name):
         # TODO: Do we need to check that ts is a number?
-        self._y = _convert_data_shape(y)
-        self._u = _convert_data_shape(u)
+        assert_less_than(y.ndim, 3)
+        assert_less_than(u.ndim, 3)
+
+        num_output_samples = y.shape[1] if y.ndim > 1 else len(y)
+        num_input_samples = u.shape[1] if u.ndim > 1 else len(u)
+        assert_equal(num_output_samples, num_input_samples)
+
+        self._y = y
+        self._u = u
         self._dt = dt
-        self._time = np.array(range(len(u)))*dt
+        self._time = np.arange(num_output_samples)*dt
         self._name = name
 
     @property
@@ -35,19 +40,21 @@ class IdDataExperiment:
 
     @property
     def num_outputs(self):
-        if self._y.ndim == 0:
-            return 0
-        return self._y.shape[1]
+        if self._y.ndim == 1:
+            return 1
+        return self._y.shape[0]
 
     @property
     def num_inputs(self):
-        if self._u.ndim == 0:
-            return 0
-        return self._u.shape[1]
+        if self._u.ndim == 1:
+            return 1
+        return self._u.shape[0]
 
     @property
     def num_samples(self):
-        return len(self.u)
+        if self._u.ndim == 1:
+            return len(self._u)
+        return self._u.shape[0]
 
     @property
     def name(self):
@@ -60,19 +67,33 @@ class IdDataExperiment:
 
     def plot(self):
         from matplotlib import pyplot as plt
-        print(self.y)
 
         plt.subplot(2, 1, 1)
         plt.title(self.name)
-        plt.plot(self.time, self.y, "r")
-        plt.ylabel("y")
-        plt.xlabel("time")
+
+        if (self.num_outputs == 1):
+            plt.plot(self.time, self._y, "r")
+            plt.ylabel("y")
+            plt.xlabel("time")
+        else:
+            for y in self._y:
+                print("y size: {0}".format(y.size))
+                print("time size: {0}".format(self.time.size))
+                plt.plot(self.time, y, "r")
+                plt.ylabel("y")
+                plt.xlabel("time")
 
         plt.subplot(2, 1, 2)
-        plt.plot(self.time, self.u, "b")
-        plt.ylabel("u")
-        plt.xlabel("time")
-
+        
+        if (self.num_inputs == 1):
+            plt.plot(self.time, self.u, "b")   
+            plt.ylabel("u")
+            plt.xlabel("time")
+        else:
+            for u in self._u:
+                plt.plot(self.time, u, "b")   
+                plt.ylabel("u")
+                plt.xlabel("time")
 
 class IdData:
 
@@ -124,12 +145,11 @@ class IdData:
         assert_not_none(u)
         assert_array_like(u)
 
-        exp = IdDataExperiment(np.array(y), np.array(u), dt, expname)
+        exp = IdDataExperiment(y, u, dt, expname)
         self._experiments.append(exp)
 
     def plot(self):
         from matplotlib import pyplot as plt
-
         for e in self._experiments:
             plt.figure()
             e.plot()
